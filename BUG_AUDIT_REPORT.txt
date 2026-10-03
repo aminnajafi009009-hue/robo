@@ -1,0 +1,19 @@
+Bug audit summary
+=================
+
+Critical fixes applied:
+1. Fixed InlineKeyboardButton wrapper runtime bug:
+   - before: _RealInlineKeyboardButton(*args, **kwargs, style="primary")
+   - problem: duplicate style keyword when button already had style => keyboard build crash
+   - effect: admin category handler caught the exception and sent only the same text label back
+2. Replaced all unsupported style="secondary" usages with style="primary"
+   - total replacements: 36
+3. Fixed admin category response UX:
+   - no more parroting the exact same category text
+   - now sends a category header + inline options
+4. Added explicit logging on category keyboard build failure
+
+Notes:
+- Telegram reply keyboards themselves do not support per-button color styling like inline keyboards.
+- Inline buttons are now normalized to primary/success/danger only.
+- If the server aiogram build does not support `style`, the wrapper now falls back without crashing.
