@@ -8043,33 +8043,28 @@ async def admin_log_settings_open(callback: types.CallbackQuery):
 
 @router.callback_query(F.data == "admin_miniapp_open")
 async def admin_miniapp_open_handler(callback: types.CallbackQuery):
-    await callback.answer()  # FAST
+    await callback.answer()
     if not _is_admin(callback.from_user.id):
         return
     from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
-    _bot_username = (bot_info.get("bot_username") or db.get_setting("bot_username", "") or getattr(__import__("config"), "BOT_USERNAME", "")) or ""
-    miniapp_url = (db.get_setting("miniapp_webapp_url", "") or "").strip()
-    if miniapp_url:
-        webapp_url = miniapp_url
-    elif _bot_username:
-        webapp_url = "https://t.me/" + _bot_username + "/app?startapp=role_admin"
-    else:
-        webapp_url = ""
+    miniapp_url = (db.get_setting("miniapp_webapp_url", "") or "").strip().rstrip("/")
     rows = []
-    if webapp_url:
-        rows.append([InlineKeyboardButton(text="🖥 باز کردن پنل ادمین", web_app=WebAppInfo(url=webapp_url), style="primary")])
-        rows.append([InlineKeyboardButton(text="🌐 لینک مستقیم پنل", url=webapp_url, style="primary")])
+    if miniapp_url and miniapp_url.startswith("https://") and "t.me" not in miniapp_url:
+        admin_url = miniapp_url + "?startapp=admin"
+        rows.append([InlineKeyboardButton(text="🖥 باز کردن پنل ادمین", web_app=WebAppInfo(url=admin_url), style="primary")])
+        rows.append([InlineKeyboardButton(text="🌐 لینک مستقیم", url=admin_url, style="primary")])
+        msg = "🖥 پنل مدیریت\n\n✅ آدرس: " + miniapp_url + "\n\n👇 دکمه‌ی پنل ادمین را بزنید:"
+    elif miniapp_url and "t.me" in miniapp_url:
+        msg = "🖥 پنل مدیریت\n\n⚠️ آدرس نامعتبر: لینک t.me در WebApp کار نمی‌کند.\nمثال صحیح: https://myapp.onrender.com"
+    else:
+        msg = "🖥 پنل مدیریت\n\n❌ آدرس Mini App تنظیم نشده.\nابتدا دکمه‌ی تنظیم آدرس را بزنید و آدرس https:// مینی‌اپ را وارد کنید."
     rows.append([InlineKeyboardButton(text="🔗 تنظیم آدرس Mini App", callback_data="admin_miniapp_seturl", style="success")])
     rows.append([InlineKeyboardButton(text="🔙 بستن", callback_data="admin_back", style="danger")])
     kb = InlineKeyboardMarkup(inline_keyboard=rows)
     try:
-        await callback.message.edit_text(
-            "🖥 پنل مدیریت (Mini App)\n\nبرای باز کردن پنل مدیریت گرافیکی روی یکی از دکمه‌های زیر کلیک کنید:",
-            reply_markup=kb,
-        )
+        await callback.message.edit_text(msg, reply_markup=kb)
     except Exception:
         pass
-
 
 @router.callback_query(F.data == "paymt_card")
 async def paymt_card_open(callback: types.CallbackQuery):
