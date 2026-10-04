@@ -143,7 +143,7 @@ class AdminStates(StatesGroup):
     waiting_botinfo_channel_name = State()
     waiting_botinfo_channel_url = State()
     waiting_referral_setting_value = State()
-    waiting_wallet_setting_value
+    waiting_wallet_setting_value = State()
     waiting_pwallet_edit = State()
     waiting_admin_service_volume = State()
     waiting_admin_service_days = State()
